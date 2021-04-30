@@ -3,8 +3,9 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
-from .models import *
+from .models import Listing, User
 
 
 def index(request):
@@ -13,7 +14,6 @@ def index(request):
 
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
@@ -22,14 +22,13 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("index")) 
         else:
             return render(request, "auctions/login.html", {
                 "message": "Invalid username and/or password."
             })
     else:
         return render(request, "auctions/login.html")
-
 
 def logout_view(request):
     logout(request)
@@ -61,3 +60,22 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+@login_required(login_url='../login')
+def new_listing(request, user_id):
+    if request.method == "POST":
+        title = request.POST["title"]
+        description = request.POST["description"]
+        start_bid = float(request.POST["start_bid"])
+        category = request.POST["category"]
+        image = request.POST["image_url"]
+        seller = User.objects.get(pk=user_id)
+        try:
+            listing = Listing(title=title, description=description,start_bid=start_bid, image=image, category=category, seller=seller)
+            listing.save()
+        except:
+            return render(request, "auctions/new_listing.html",{
+                "message": "Please make sure to fill required field correctly"
+            })
+        return HttpResponseRedirect(reverse("index"))
+    return render(request, "auctions/new_listing.html")

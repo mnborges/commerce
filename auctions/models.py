@@ -14,7 +14,7 @@ class Listing(models.Model):
     start_date = models.DateTimeField(auto_now=True)
     end_date = models.DateTimeField(null=True, blank = True)
     status = models.BooleanField(default=True)
-    image = models.URLField(null=True) 
+    image = models.URLField(null=True, blank = True) 
     category = models.CharField(max_length=64, null=True, blank=True) #models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="listings")
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     def __str__(self):
