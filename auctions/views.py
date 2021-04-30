@@ -3,8 +3,9 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
-from .models import *
+from .models import Listing, User
 
 
 def index(request):
@@ -61,3 +62,22 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+@login_required
+def new_listing(request, user_id):
+    if request.method == "POST":
+        title = request.POST["title"]
+        description = request.POST["description"]
+        start_bid = float(request.POST["start_bid"])
+        category = request.POST["category"]
+        image = request.POST["image_url"]
+        seller = User.objects.get(pk=user_id)
+        try:
+            listing = Listing(title=title, description=description,start_bid=start_bid, image=image, category=category, seller=seller)
+            listing.save()
+        except:
+            return render(request, "auctions/new_listing.html",{
+                "message": "Please make sure to fill required field correctly"
+            })
+        return HttpResponseRedirect(reverse("index"))
+    return render(request, "auctions/new_listing.html")
