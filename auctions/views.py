@@ -5,12 +5,14 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from .models import Listing, User
+from .models import *
 
 
 def index(request):
-    return render(request, "auctions/index.html")
-
+    active_listing = list(Listing.objects.filter(status=True))
+    return render(request, "auctions/index.html",{
+        "active_listing": active_listing
+    })
 
 def login_view(request):
     if request.method == "POST":
@@ -75,7 +77,7 @@ def new_listing(request, user_id):
             listing.save()
         except:
             return render(request, "auctions/new_listing.html",{
-                "message": "Please make sure to fill required field correctly"
+                "message": "Please fill all required field correctly"
             })
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/new_listing.html")
