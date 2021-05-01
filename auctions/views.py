@@ -9,12 +9,13 @@ from .models import Listing, User
 
 
 def index(request):
-    return render(request, "auctions/index.html")
-
+    active_listing = list(Listing.objects.filter(status=True))
+    return render(request, "auctions/index.html",{
+        "active_listing": active_listing
+    })
 
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
@@ -23,14 +24,13 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("index")) 
         else:
             return render(request, "auctions/login.html", {
                 "message": "Invalid username and/or password."
             })
     else:
         return render(request, "auctions/login.html")
-
 
 def logout_view(request):
     logout(request)
@@ -63,7 +63,8 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-@login_required
+
+@login_required(login_url='../login')
 def new_listing(request, user_id):
     if request.method == "POST":
         title = request.POST["title"]
@@ -77,7 +78,7 @@ def new_listing(request, user_id):
             listing.save()
         except:
             return render(request, "auctions/new_listing.html",{
-                "message": "Please make sure to fill required field correctly"
+                "message": "Please fill all required field correctly"
             })
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/new_listing.html")
