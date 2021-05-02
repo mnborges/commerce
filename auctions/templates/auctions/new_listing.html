@@ -2,9 +2,9 @@
 {% block body %}
     <h2>Create Listing</h2>
 	{% if message %}
-		<div>{{ message }}</div>
+		<div class "alert alert-warning"><strong>Warning! </strong>{{ message }}</div>
 	{% endif %}
-	<form action="{% url 'new_listing' user.id %}" method="POST">
+	<form action="{% url 'new_listing' %}" method="POST">
 		{% csrf_token %}
 		<div class="form-group">
 			<input required autofocus class="form-control" type="text" name="title" placeholder="Title">
@@ -21,6 +21,7 @@
 		<div class="form-group">
 			<textarea required class="form-control" name ="description" placeholder="Description"></textarea>
 		</div>
+		<input type="hidden" name="user_id" value="{{ user.id }}">
 		<input class="btn btn-primary" type="submit" value="Post">
 	</form>
 {% endblock %}
