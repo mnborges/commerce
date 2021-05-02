@@ -1,0 +1,97 @@
+{% extends "auctions/layout.html" %}
+{% block body %}
+	{% if message %}
+	<div class= "alert alert-warning">
+		<strong>Warning! </strong>{{ message }}
+	</div>
+	{% endif %}
+	<div class="row">
+		<div class = "col-4  mt-2 mb-2" >
+		{% if listing.image %}
+			<img class=" blcen img-thumbnail" src="{{ listing.image }}" >
+		{% endif %}		
+		</div>
+		<div class = "col-8 mt-2 mb-2">
+			<h3> {{ listing.title }} </h3><br>
+			<p> {{ listing.description}}<br>
+			Starting Bid: <strong> ${{ listing.start_bid }}</strong> </p>
+			<p>Created {{ listing.start_date }} by <strong>{{listing.seller.username}} </strong></p><br>
+			{% if listing.status %} 
+				{% if current_bid %}
+					Current Bid: <strong>${{ current_bid.value }} </strong>
+					{% if current_bid.bidder.id == user.id %}
+						<p style="color: blue">You are currently winning the auction!</p>
+					{% endif %}
+				{% else %} No bids yet. 
+				{% endif %}
+				{% if user.is_authenticated %}
+					{% if user.id == listing.seller.id %}
+						<form action="{% url 'listing_page' listing.id %}" method="POST" id="close_auction">
+						{% csrf_token %}
+							<div class="form-group">
+								<input type="hidden" name="user_id" value="{{ user.id }}">
+								<input type="hidden" name="action" value="close">
+								<input class="btn btn-primary" type="submit" value="Close Auction">
+							</div>
+						</form>
+					{% else %}
+						<form action="{% url 'listing_page' listing.id %}" method="POST" id="bid_form">
+						{% csrf_token %} 
+							<div class="form-group">
+								<input required type="number" class="form-control" placeholder="Place a bid..." name="bid_value">
+							</div>
+							<div class="form-group">
+								<input type="hidden" name="user_id" value="{{ user.id }}">
+								<input type="hidden" name="action" value="bid">
+								<input class="btn btn-primary" type="submit" value="Bid">
+							</div>	
+						</form>
+					{% endif %}
+				{% else %}
+					<br><a href="{% url 'login' %}"> Log In</a> to bid on this listing
+				{% endif %}
+			{% else %}
+				<div class= "alert alert-warning">Auction closed.</div>
+				{% if current_bid %}
+					{% if current_bid.bidder.id == user.id %} 
+						<div class= "alert alert-success"><strong>Congratulations! </strong>You won this auction.</div>
+					{% elif user.id == listing.seller.id %}
+						<div class= "alert alert-success"><strong>Congratulations! </strong>You sold this item to <strong>{{ current_bid.bidder.username }}</strong> for ${{ current_bid.value }}.</div>
+					{% endif %}
+				{% else %} <div class= "alert alert-danger">No bids were made.</div>
+				{% endif %}
+			{% endif %}
+		</div>
+	</div>
+	<hr>
+	<h3>Comment Section</h3><br>
+	<div class ="p-4">
+	{% for comment in comments %}
+		<div style="border-bottom:1px solid grey;" class ="p-3">
+			<h4><strong>{{ comment.author.username }}</strong></h4>
+			<p>{{ comment.content }}</p>
+			<p style="color:grey">{{ comment.date }}</p>
+		</div>
+	{% empty %}
+		<p>No comments</p>
+	{% endfor %}
+
+	{% if user.is_authenticated %}
+		<div class="p-4">
+			<form action= "{% url 'listing_page' listing.id %}" method="POST" id="comment_form">
+			{% csrf_token %} 
+				<div class="form-group">
+					<textarea class="form-control" form = "comment_form" required placeholder="Leave a comment..." name= "content"></textarea>
+				</div>
+				<div class="form-group">
+					<input type="hidden" name="user_id" value="{{ user.id }}">
+					<input type="hidden" name="action" value="comment">
+					<input class="btn btn-primary" type="submit" value="Comment">
+				</div>
+			</form>
+		</div>
+	{% else %}
+		<a href="{% url 'login' %}"> Log In</a> to comment on this listing
+	{% endif %}
+	</div>
+{% endblock %}

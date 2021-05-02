@@ -13,7 +13,7 @@
 		</div>
 		<div class="col-1 mt-2 mb-2"></div>
 		<div class = "col-8 mt-2 mb-2">
-			<li class = "nomarker"><strong>{{ listing.title }}</strong></li>
+			<li class = "nomarker"><strong><a href="{% url 'listing_page' listing.id%}"> {{ listing.title }}</a></strong></li>
 			<ul>	
 				<li class = "nomarker"> {{ listing.description }} </li>
 				<li class = "nomarker">Created {{ listing.start_date }} by <strong>{{listing.seller.username}} </strong></li>

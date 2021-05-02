@@ -64,8 +64,9 @@ def register(request):
         return render(request, "auctions/register.html")
 
 @login_required(login_url='../login')
-def new_listing(request, user_id):
+def new_listing(request):
     if request.method == "POST":
+        user_id = request.POST["user_id"]
         title = request.POST["title"]
         description = request.POST["description"]
         start_bid = float(request.POST["start_bid"])
@@ -81,3 +82,47 @@ def new_listing(request, user_id):
             })
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/new_listing.html")
+    
+def listing_page(request, listing_id):
+    message= ""
+    listing = Listing.objects.get(pk=listing_id)
+    current_bid = listing.bids.last()
+    if request.method == "POST": #someone placed a bid, a comment, or wants to close the auction
+        action = request.POST['action']
+        user_id = request.POST['user_id']
+        user = User.objects.get(pk=user_id)
+        if action == 'bid': 
+            value = float(request.POST['bid_value'])
+            if ((current_bid and value <= current_bid.value) or value < listing.start_bid): #checks if bid is valid
+                message = "Bid not valid. Value should be greater than current bid (if any) or equal/greater than starting bid."
+            else: 
+                try:
+                    new_bid = Bid(value = value, bidder=user,product=listing)
+                    new_bid.save()
+                    return HttpResponseRedirect(reverse("listing_page", args=(listing_id,)))
+                except:
+                    message="Could not post your bid."
+        elif action == 'comment':
+            content = request.POST['content']
+            try:
+                comment = Comment(content=content, page=listing, author=user)
+                comment.save()
+                return HttpResponseRedirect(reverse("listing_page", args=(listing_id,)))
+            except:
+                message="Your comment could not be posted."
+        elif action == 'close':
+            listing.status = False #status False closes the auction
+            try:
+                listing.save() 
+                return HttpResponseRedirect(reverse("listing_page", args=(listing_id,)))
+            except:
+                message="Could not close the auction."
+        else:
+            return HttpResponseRedirect(reverse("index"))    
+    comments = listing.comments.all()
+    return render(request, "auctions/listing_page.html",{
+        "listing":listing,
+        "comments": comments,
+        "current_bid": current_bid,
+        "message": message
+    })
