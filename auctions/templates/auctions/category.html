@@ -1,0 +1,13 @@
+{% extends "auctions/listing_layout.html" %}
+{% block title %}{{ category_name }}{% endblock %}
+{% block h2 %}
+	{% if flag %}
+		<div class="alert alert-danger"><strong>{{ category_name }}</strong> category does not exist yet.</div>
+	{% else %}
+		<h2> {{ category_name }} </h2>
+	{% endif %}
+{% endblock %}
+{% block empty_listing %}
+	{% if not flag %} <div class="alert alert-info">There are no itens in the {{ category_name }} category yet.</div> {% endif %}
+{% endblock %}
+

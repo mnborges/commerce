@@ -1,0 +1,33 @@
+{% extends "auctions/layout.html" %}
+{% block body %}
+	{% block h2 %}
+	{% endblock %}
+	<ul>
+	{% for listing in listings %}
+	<div class="row">
+		<div class = "col-3  mt-2 mb-2" >
+		{% if listing.image %}
+			<img class=" blcen img-thumbnail" src="{{ listing.image }}" >
+		{% endif %}		
+		</div>
+		<div class="col-1 mt-2 mb-2"></div>
+		<div class = "col-8 mt-2 mb-2">
+			<li class = "nomarker"><strong><a href="{% url 'listing_page' listing.id%}"> {{ listing.title }}</a></strong></li>
+			<ul>	
+				<li class = "nomarker"> {{ listing.description }} </li>
+				{% if listing.status == True %}
+					<li class = "nomarker">Created {{ listing.start_date }} by <strong>{{listing.seller.username}} </strong></li>
+				{% else %}
+					<li class = "nomarker" style="color:#dc3545">Closed on {{ listing.end_date }}</li>
+				{% endif %}
+			</ul>
+		</div>
+	</div>
+	<hr>
+	{% empty %}
+		{% block empty_listing  %}
+		{% endblock %}
+	{% endfor %}
+		
+	</ul>
+{% endblock %}

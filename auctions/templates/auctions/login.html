@@ -1,11 +1,10 @@
 {% extends "auctions/layout.html" %}
-
 {% block body %}
 
     <h2>Login</h2>
 
     {% if message %}
-        <div class="alert alert-warning"><strong>Warining! </strong>{{ message }}</div>
+        <div class="alert alert-warning"><strong>Warning! </strong>{{ message }}</div>
     {% endif %}
 
     <form action="{% url 'login' %}" method="post">
