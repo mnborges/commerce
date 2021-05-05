@@ -1,8 +1,9 @@
 {% extends "auctions/layout.html" %}
+{% block title %}{{ listing.title }}{% endblock %}
 {% block body %}
 	{% if message %}
-	<div class= "alert alert-warning">
-		<strong>Warning! </strong>{{ message }}
+	<div class= "alert alert-danger ">
+		{{ message }}
 	</div>
 	{% endif %}
 	<div class="row">
@@ -12,7 +13,23 @@
 		{% endif %}		
 		</div>
 		<div class = "col-8 mt-2 mb-2">
-			<h3> {{ listing.title }} </h3><br>
+			{% if user.is_authenticated %}
+				<form action="{% url 'watchlist' %}" method="POST">
+				{% csrf_token %}
+					<div class="form-group">
+						<input type="hidden" name="listing_id" value="{{ listing.id }}">
+						{% if request.user in on_watch %}
+							<input type="hidden" name="action" value="remove">
+							<input class="btn btn-danger float-right" type="submit" value="Remove from Watchlist">
+						{% else %}
+							<input type="hidden" name="action" value="add">
+							<input class="btn btn-primary float-right" type="submit" value="Add to Watchlist">
+						{% endif %}
+					</div>
+				</form>
+			{% endif %}
+			<h3> {{ listing.title }} </h3>
+			{% if listing.group.category %} <a href="{% url 'category' listing.group %}"> <p>{{ listing.group.category }}</a><br> {% endif %}
 			<p> {{ listing.description}}<br>
 			Starting Bid: <strong> ${{ listing.start_bid }}</strong> </p>
 			<p>Created {{ listing.start_date }} by <strong>{{listing.seller.username}} </strong></p><br>
@@ -25,11 +42,10 @@
 				{% else %} No bids yet. 
 				{% endif %}
 				{% if user.is_authenticated %}
-					{% if user.id == listing.seller.id %}
+					{% if request.user.id == listing.seller.id %}
 						<form action="{% url 'listing_page' listing.id %}" method="POST" id="close_auction">
 						{% csrf_token %}
 							<div class="form-group">
-								<input type="hidden" name="user_id" value="{{ user.id }}">
 								<input type="hidden" name="action" value="close">
 								<input class="btn btn-primary" type="submit" value="Close Auction">
 							</div>
@@ -38,7 +54,7 @@
 						<form action="{% url 'listing_page' listing.id %}" method="POST" id="bid_form">
 						{% csrf_token %} 
 							<div class="form-group">
-								<input required type="number" class="form-control" placeholder="Place a bid..." name="bid_value">
+								<input required type="number" step=".01" class="form-control" placeholder="Place a bid..." name="bid_value">
 							</div>
 							<div class="form-group">
 								<input type="hidden" name="user_id" value="{{ user.id }}">
@@ -51,11 +67,11 @@
 					<br><a href="{% url 'login' %}"> Log In</a> to bid on this listing
 				{% endif %}
 			{% else %}
-				<div class= "alert alert-warning">Auction closed.</div>
+				<div class= "alert alert-warning">Auction closed on {{ listing.end_date }} </div>
 				{% if current_bid %}
-					{% if current_bid.bidder.id == user.id %} 
+					{% if current_bid.bidder.id == request.user.id %} 
 						<div class= "alert alert-success"><strong>Congratulations! </strong>You won this auction.</div>
-					{% elif user.id == listing.seller.id %}
+					{% elif request.user.id == listing.seller.id %}
 						<div class= "alert alert-success"><strong>Congratulations! </strong>You sold this item to <strong>{{ current_bid.bidder.username }}</strong> for ${{ current_bid.value }}.</div>
 					{% endif %}
 				{% else %} <div class= "alert alert-danger">No bids were made.</div>
@@ -81,12 +97,14 @@
 			<form action= "{% url 'listing_page' listing.id %}" method="POST" id="comment_form">
 			{% csrf_token %} 
 				<div class="form-group">
-					<textarea class="form-control" form = "comment_form" required placeholder="Leave a comment..." name= "content"></textarea>
+					<textarea {% if not listing.status %} disabled {% endif %}
+						class="form-control" form = "comment_form" required placeholder="Leave a comment..." name= "content"></textarea>
 				</div>
 				<div class="form-group">
 					<input type="hidden" name="user_id" value="{{ user.id }}">
 					<input type="hidden" name="action" value="comment">
-					<input class="btn btn-primary" type="submit" value="Comment">
+					<input {% if not listing.status %} disabled {% endif %}
+						class="btn btn-primary" type="submit" value="Comment">
 				</div>
 			</form>
 		</div>

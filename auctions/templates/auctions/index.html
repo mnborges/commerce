@@ -1,29 +1,8 @@
-{% extends "auctions/layout.html" %}
-{% block body %}
+{% extends "auctions/listing_layout.html" %}
+{% block h2 %}
 	<h2>Active Listings</h2>
-	<ul>
-	{% for listing in active_listing %}
-	<div class="row">
-		<div class = "col-3  mt-2 mb-2" >
-		{% if listing.image %}
-			<img class=" blcen img-thumbnail" src="{{ listing.image }}" >
-		{% else %}
-			<img class="blcen img-thumbnail" src="https://bit.ly/3u9Y1MA">
-		{% endif %}		
-		</div>
-		<div class="col-1 mt-2 mb-2"></div>
-		<div class = "col-8 mt-2 mb-2">
-			<li class = "nomarker"><strong><a href="{% url 'listing_page' listing.id%}"> {{ listing.title }}</a></strong></li>
-			<ul>	
-				<li class = "nomarker"> {{ listing.description }} </li>
-				<li class = "nomarker">Created {{ listing.start_date }} by <strong>{{listing.seller.username}} </strong></li>
-			</ul>
-		</div>
-	</div>
-	<hr>
-	{% empty %}
-			<p>There is no active listing at the moment.</p>
-	{% endfor %}
-		
-	</ul>
+{% endblock %}
+
+{% block empty_listing %}
+	<div class "alert alert-info">There is no active listing at the moment.</div>
 {% endblock %}
