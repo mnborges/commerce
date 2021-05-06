@@ -29,7 +29,7 @@
 				</form>
 			{% endif %}
 			<h3> {{ listing.title }} </h3>
-			<a href="{% url 'category' listing.group.category %}"> <p>{{ listing.group.category }}</a><br>
+			{% if listing.group.category %} <a href="{% url 'category' listing.group %}"> <p>{{ listing.group.category }}</a><br> {% endif %}
 			<p> {{ listing.description}}<br>
 			Starting Bid: <strong> ${{ listing.start_bid }}</strong> </p>
 			<p>Created {{ listing.start_date }} by <strong>{{listing.seller.username}} </strong></p><br>
@@ -54,7 +54,7 @@
 						<form action="{% url 'listing_page' listing.id %}" method="POST" id="bid_form">
 						{% csrf_token %} 
 							<div class="form-group">
-								<input required type="number" step=".25" class="form-control" placeholder="Place a bid..." name="bid_value">
+								<input required type="number" step=".01" class="form-control" placeholder="Place a bid..." name="bid_value">
 							</div>
 							<div class="form-group">
 								<input type="hidden" name="user_id" value="{{ user.id }}">

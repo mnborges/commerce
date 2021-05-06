@@ -24,7 +24,7 @@ class Listing(models.Model):
     on_watch = models.ManyToManyField(User, blank=True, related_name='watchlist')
     def __str__(self):
         st = 'open' if self.status==True else  'closed'
-        return f"{self.id}: listing of {self.title} created by {self.seller.username} is {st}"
+        return f"{self.id}: {self.title} ({st})"
         
 class Bid(models.Model):
     date = models.DateTimeField(auto_now_add=True, editable=False)
@@ -32,7 +32,7 @@ class Bid(models.Model):
     bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
     product = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
     def __str__(self):
-        return f"{self.id}: bid of {self.value} on {self.product.title} made by {self.bidder.username}"
+        return f"{self.value} - {self.product.title} ({self.bidder})"
  
 class Comment(models.Model):
     date = models.DateTimeField(auto_now_add=True, editable=False)
@@ -40,4 +40,4 @@ class Comment(models.Model):
     page = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     def __str__(self):
-        return f"{self.id}: comment made by {self.author.username} on {self.page.title} page"
+        return f"{self.id}: {self.author.username} ({self.page.title})"

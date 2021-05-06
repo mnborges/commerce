@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from datetime import datetime
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 
 from .models import Listing, User
@@ -116,7 +116,8 @@ def listing_page(request, listing_id):
                 message="Your comment could not be posted."
         elif action == 'close':
             listing.status = False #status False closes the auction
-            listing.end_date = datetime.now()
+
+            listing.end_date = timezone.now()
             try:
                 listing.save() 
                 return HttpResponseRedirect(reverse("listing_page", args=(listing_id,)))
